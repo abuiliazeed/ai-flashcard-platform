@@ -50,12 +50,16 @@ const QuizPage: NextPage = () => {
         body: JSON.stringify({ topicId }),
       })
 
+      const data = await response.json()
+
       if (!response.ok) {
-        const errorData = await response.json()
-        throw new Error(errorData.error || 'Failed to generate quiz')
+        console.error('Quiz generation error:', data)
+        throw new Error(data.error || 'Failed to generate quiz')
       }
 
-      const data = await response.json()
+      if (!data.quiz || !Array.isArray(data.quiz) || data.quiz.length === 0) {
+        throw new Error('Invalid quiz data received')
+      }
       setQuiz(data.quiz)
     } catch (error) {
       console.error('Error generating quiz:', error)
@@ -69,35 +73,6 @@ const QuizPage: NextPage = () => {
     setSelectedAnswer(answer)
   }
 
-  const handleFinishQuiz = async () => {
-    setQuizCompleted(true)
-    try {
-      const { data: { session } } = await supabase.auth.getSession()
-      const token = session?.access_token
-
-      if (!token) {
-        throw new Error('No authentication token found')
-      }
-
-      const response = await fetch('/api/progress/update', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify({ topicId, score }),
-      })
-
-      if (!response.ok) {
-        const errorData = await response.json()
-        throw new Error(errorData.error || 'Failed to update progress')
-      }
-    } catch (error) {
-      console.error('Error updating progress:', error)
-      setError(error instanceof Error ? error.message : 'An unknown error occurred')
-    }
-  }
-
   const handleNextQuestion = () => {
     if (selectedAnswer === quiz[currentQuestion].correctAnswer) {
       setScore(score + 1)
@@ -107,7 +82,7 @@ const QuizPage: NextPage = () => {
       setCurrentQuestion(currentQuestion + 1)
       setSelectedAnswer(null)
     } else {
-      handleFinishQuiz()
+      setQuizCompleted(true)
     }
   }
 
@@ -133,6 +108,10 @@ const QuizPage: NextPage = () => {
   }
 
   const currentQuizQuestion = quiz[currentQuestion]
+
+  if (!currentQuizQuestion) {
+    return <ErrorMessage message="No quiz questions available" />
+  }
 
   return (
     <div>

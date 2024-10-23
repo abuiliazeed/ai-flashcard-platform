@@ -32,11 +32,12 @@ CREATE TABLE public.quizzes (
   created_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc'::text, NOW()) NOT NULL
 );
 
--- Create progress table
+-- Update progress table
 CREATE TABLE public.progress (
   id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
   user_id UUID REFERENCES auth.users NOT NULL,
   topic_id UUID REFERENCES public.topics NOT NULL,
+  score INTEGER,  -- Add this line
   progress_data JSONB NOT NULL,
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc'::text, NOW()) NOT NULL
 );

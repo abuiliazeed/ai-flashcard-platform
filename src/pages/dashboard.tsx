@@ -65,11 +65,15 @@ const DashboardPage: NextPage = () => {
   const fetchProgress = async () => {
     const { data, error } = await supabase
       .from('progress')
-      .select('topic_id, score')
+      .select('topic_id, score, progress_data')
       .eq('user_id', user?.id)
 
     if (error) throw error
-    setProgress(data)
+    setProgress(data.map(item => ({
+      topic_id: item.topic_id,
+      score: item.score || 0,  // Use 0 if score is null
+      progress_data: item.progress_data
+    })))
   }
 
   const fetchRecommendations = async () => {
