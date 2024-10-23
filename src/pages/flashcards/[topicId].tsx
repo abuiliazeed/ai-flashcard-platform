@@ -72,6 +72,9 @@ const FlashcardsPage: NextPage = () => {
               <Button onClick={handlePrevious}>Previous</Button>
               <Button onClick={handleNext}>Next</Button>
             </div>
+            <p className="text-center mt-4">
+              Card {currentIndex + 1} of {flashcards.length}
+            </p>
           </div>
         ) : (
           <p>No flashcards available for this topic.</p>
